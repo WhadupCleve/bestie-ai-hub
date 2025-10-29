@@ -1,11 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/bash
-set -e
+set -euo pipefail
 cd ~/bestie_ai
-# Enter safe mode
-./safe_mode.sh on
-# Kill common long-running things
+
+echo "🧹 Panic scrub starting (local only)…"
+# Stop local server if running
 pkill -f "http.server" 2>/dev/null || true
-pkill -f "uvicorn" 2>/dev/null || true
-pkill -f "python .*app.py" 2>/dev/null || true
-# leave watcher tmux alone so health keeps logging
-echo "🛑 PANIC: everything halted, safe mode ON"
+
+# Keep secrets + scripts; scrub volatile stuff
+rm -f HEALTH.log
+rm -f outputs/*.html outputs/*.md outputs/*.tsv outputs/*.csv 2>/dev/null || true
+find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+
+echo "✅ Done. Your .env and /Download/BestieAI/ ZIPs are untouched."
