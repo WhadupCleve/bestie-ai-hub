@@ -4,19 +4,26 @@ cd ~/bestie_ai
 ./boot.sh >/dev/null
 
 # find latest care files
-INTAKE=$(ls -t outputs/care_intake_*.md 2>/dev/null | head -n1)
+SUMMARY=$(ls -t outputs/care_summary_*.md 2>/dev/null | head -n1)
 BRIEF=$(ls -t outputs/care_doctor_brief_*.md 2>/dev/null | head -n1)
+INTAKE=$(ls -t outputs/care_intake_*.md 2>/dev/null | head -n1)
 FUPS=$(ls -t outputs/care_followups_*.md 2>/dev/null | head -n1)
-[ -z "$INTAKE" ] && { echo "No care_* files found. Run bcare first."; exit 1; }
+
+# require at least one section to exist
+if [ -z "$SUMMARY" ] && [ -z "$BRIEF" ] && [ -z "$INTAKE" ] && [ -z "$FUPS" ]; then
+  echo "Nothing to bundle. Run: bcare ... and/or bcare_summary"
+  exit 1
+fi
 
 TS=$(date -u +'%Y%m%d_%H%M%S')
 OUTMD="outputs/care_bundle_${TS}.md"
 OUTHTML="outputs/care_bundle_${TS}.html"
 
-# bundle markdown with a title + mini CSS
+# assemble markdown bundle
 {
   echo "# Care Pack — Print Bundle (${TS} UTC)"
   echo
+  [ -n "$SUMMARY" ] && { echo "## Symptom Summary"; echo; cat "$SUMMARY"; echo; }
   [ -n "$BRIEF" ] && { echo "## Doctor Brief"; echo; cat "$BRIEF"; echo; }
   [ -n "$INTAKE" ] && { echo "## Patient Intake Checklist"; echo; cat "$INTAKE"; echo; }
   [ -n "$FUPS" ] && { echo "## Follow-up Questions"; echo; cat "$FUPS"; echo; }
@@ -25,16 +32,20 @@ OUTHTML="outputs/care_bundle_${TS}.html"
 } > "$OUTMD"
 
 # light CSS for printing
-CSS=outputs/pandoc_print.css
+CSS=/sdcard/Download/BestieAI/pandoc_print.css
+mkdir -p /sdcard/Download/BestieAI
 cat > "$CSS" <<'CSS'
 body { font-family: -apple-system, Roboto, "Segoe UI", Arial, sans-serif; line-height: 1.4; margin: 24px; }
 h1, h2, h3 { margin-top: 1.2em; margin-bottom: 0.5em; }
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 hr { border: 0; border-top: 1px solid #ddd; margin: 1.2em 0; }
 blockquote { color: #444; border-left: 4px solid #ddd; padding-left: 12px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ddd; padding: 6px; font-size: 14px; }
+th { background: #f7f7f7; }
 CSS
 
-# Need pandoc: install if missing hint
+# need pandoc
 if ! command -v pandoc >/dev/null 2>&1; then
   echo "pandoc not found. Install with: pkg install -y pandoc"
   exit 1
@@ -44,8 +55,9 @@ pandoc "$OUTMD" --from markdown --to html5 --standalone \
   --metadata title="Care Pack — Print Bundle" \
   --css "$CSS" -o "$OUTHTML"
 
-./sync.sh
-echo "✅ Print bundle saved & synced:"
+./sync.sh >/dev/null 2>&1 || true
+
+echo "✅ Print bundle saved:"
 echo " - $OUTMD"
 echo " - $OUTHTML"
-echo "Open the HTML in your browser → Share → Print → **Save as PDF**."
+echo "Open in Chrome → Share → Print → Save as PDF."
