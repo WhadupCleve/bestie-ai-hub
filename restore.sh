@@ -16,10 +16,11 @@ python -m venv .venv
 pip install --upgrade pip
 pip install requests
 
-# 4) Add core aliases
-for A in bboot bhealth bstatus bsync; do
-  grep -qxF "alias $A=\"~/bestie_ai/$A.sh\"" ~/.bashrc ||
-  echo "alias $A=\"~/bestie_ai/$A.sh\"" >> ~/.bashrc
+
+# 4) Add core aliases (point to existing scripts)
+for P in "bboot:boot.sh" "bhealth:health.sh" "bstatus:status.sh" "bsync:sync.sh"; do
+  A="${P%%:*}"; F="${P##*:}"
+  grep -qxF "alias $A=\"~/bestie_ai/$F\"" ~/.bashrc || echo "alias $A=\"~/bestie_ai/$F\"" >> ~/.bashrc
 done
 
 echo "✅ restore.sh done. Run:  . ~/.bashrc  &&  bboot"
