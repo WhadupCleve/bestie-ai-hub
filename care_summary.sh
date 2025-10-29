@@ -13,25 +13,23 @@ fi
 TS=$(date -u +'%Y%m%d_%H%M%S')
 OUT="outputs/care_summary_${TS}.md"
 
-# Use Python to filter notes by DAYS and render markdown
 python - <<'PY' "$CSV" "$DAYS" "$OUT"
-import sys, csv, datetime as dt, os
+import sys, csv, datetime as dt
 csv_path, days_str, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 days = int(days_str)
-now = dt.datetime.utcnow()
+
+now = dt.datetime.now(dt.UTC)
 cut = now - dt.timedelta(days=days)
 
 rows = []
 with open(csv_path, newline='', encoding='utf-8') as f:
     r = csv.DictReader(f)
     for row in r:
-        ts = row.get("timestamp","")
-        note = row.get("note","").strip()
-        # format: "YYYY-mm-dd HH:MM:SS UTC"
+        ts = row.get("timestamp","").replace(" UTC","")
+        note = (row.get("note","") or "").strip()
         try:
-            # Strip trailing " UTC"
-            ts_clean = ts.replace(" UTC","")
-            t = dt.datetime.strptime(ts_clean, "%Y-%m-%d %H:%M:%S")
+            t = dt.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+            t = t.replace(tzinfo=dt.UTC)
         except Exception:
             continue
         if t >= cut:
@@ -46,7 +44,7 @@ with open(out_path, "w", encoding="utf-8") as out:
     else:
         out.write("| Date (UTC) | Note |\n|---|---|\n")
         for t,n in rows:
-            tstr = t.strftime("%Y-%m-%d %H:%M")
+            tstr = t.astimezone(dt.UTC).strftime("%Y-%m-%d %H:%M")
             n = n.replace("|","\\|")
             out.write(f"| {tstr} | {n} |\n")
     out.write("\n> Not medical advice — bring to a licensed clinician.\n")
