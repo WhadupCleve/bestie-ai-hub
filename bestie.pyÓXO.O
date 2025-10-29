@@ -1,0 +1,150 @@
+import os, sys, json, re, requests
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv("PERPLEXITY_API_KEY", "").strip()
+MODEL   = os.getenv("PERPLEXITY_MODEL", "sonar-pro").strip()
+
+def ask_perplexity(messages, temperature=0.4, timeout=60):
+    if not API_KEY:
+        return "❌ Missing PERPLEXITY_API_KEY in .env"
+    url = "https://api.perplexity.ai/chat/completions"
+    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+    payload = {"model": MODEL, "messages": messages, "temperature": temperature, "stream": False}
+    r = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    if r.status_code != 200:
+        return f"❌ HTTP {r.status_code}: {r.text[:1000]}"
+    j = r.json()
+    content = j.get("choices",[{}])[0].get("message",{}).get("content","")
+    # strip citation markers like [1], [2]
+    content = re.sub(r"\[\d+\]", "", content).strip()
+    return content
+
+def normal_chat(user_text: str) -> str:
+    system = "You are Bestie 🐼 — precise, helpful, and casual. Do not include citation markers."
+    msgs = [
+        {"role":"system","content":system},
+        {"role":"user","content":user_text}
+    ]
+    return ask_perplexity(msgs, temperature=0.4)
+
+def bio_mode(user_brief: str) -> str:
+    """
+    Generates a third-person, mythic/oracle-style bio for Matthew David Cargnel.
+    Clean prose, no quotes, no headings, 130–180 words, 2–3 short paragraphs.
+    Focus: mobile-only AI engineering (Hugging Face Spaces on mobile, Termux Python),
+    multi-model orchestration, API integrations, GitHub + HF workflows, OSINT-aware ethics.
+    """
+    system = (
+        "You write public-facing bios in a mythic/oracle tone—calm, inevitable, and elite. "
+        "Output clean third-person prose only (no lists, quotes, emojis, headings, or citations). "
+        "Target length: 130–180 words in 2–3 compact paragraphs. "
+        "Center on mobile-native AI systems, multi-model orchestration, and API-first engineering."
+    )
+    prompt = f"""
+Write a third-person bio for **Matthew David Cargnel** (aka Cleveland/Cleve).
+Profile: underground-leaning AI builder who engineered multi-agent orchestration from mobile-only infrastructure.
+Show credibility without hype; avoid buzzword stuffing. Mention: Hugging Face Spaces (mobile), Termux Python CLI, API integrations (OpenAI/Groq/Perplexity/Mistral when available), GitHub/HF workflow, and operational discipline. 
+No quotes, no headings, no emojis, no bullet points. Two or three short paragraphs, 130–180 words. 
+Close on forward momentum (shipping stable systems, adding providers later), not on dreams.
+User brief to weave in (optional context): {user_brief.strip()}
+""".strip()
+
+    msgs = [
+        {"role":"system","content":system},
+        {"role":"user","content":prompt}
+    ]
+    text = ask_perplexity(msgs, temperature=0.3)
+    # final cleanup: strip stray markdown asterisks or leftover brackets
+    text = re.sub(r"\*+", "", text)
+    text = re.sub(r"\s+\n", "\n", text).strip()
+    return text
+    def yt_mode(user_brief: str) -> str:
+    """
+    Creates viral-ready titles + hooks + 3 caption lines for short-form video.
+    Style: punchy, 8–12 words titles; hooks < 12 words; captions under 100 chars.
+    No emojis unless user asks later. No hashtags unless explicitly requested.
+    """
+    system = (
+        "You generate short-form video copy that converts. "
+        "Output ONLY plain text blocks: Title:, Hook:, Captions:. "
+        "Titles: 8–12 words, punchy, no emojis. "
+        "Hook: <=12 words, must stop scroll. "
+        "Captions: 3 lines, each <100 chars, no hashtags unless user asked."
+    )
+    prompt = f"""
+Create a high-converting short-form package for this brief:
+
+{user_brief.strip()}
+
+Return exactly:
+Title: <one line>
+Hook: <one line>
+Captions:
+- <line 1>
+- <line 2>
+- <line 3>
+""".strip()
+
+    msgs = [
+        {"role":"system","content":system},
+        {"role":"user","content":prompt}
+    ]
+    return ask_perplexity(msgs, temperature=0.5)
+def main():
+    if len(sys.argv) <= 1:
+        print('Usage:\n  bestie "message"\n  bestie -bio "context"\n  bestie -yt "video brief"')
+        sys.exit(0)
+
+    mode = sys.argv[1]
+    if mode == "-bio":
+        user_brief = " ".join(sys.argv[2:]).strip() or "Focus on mobile-only HF Spaces + Termux pipeline and orchestrating multiple AIs cleanly."
+        print(bio_mode(user_brief))
+        return
+    if mode == "-yt":
+        user_brief = " ".join(sys.argv[2:]).strip() or "Ohio State football hype; 12–20s vertical; intense; no hashtags."
+        print(yt_mode(user_brief))
+        return
+
+    # default chat
+    user_text = " ".join(sys.argv[1:]).strip()
+    print(normal_chat(user_text))
+
+if __name__ == "__main__":
+    main()
+
+def yt_mode(user_brief: str) -> str:
+    """
+    Creates viral-ready titles + hooks + 3 caption lines for short-form video.
+    Style: punchy, 8–12 words titles; hooks < 12 words; captions under 100 chars.
+    No emojis unless user asks later. No hashtags unless explicitly requested.
+    """
+    system = (
+        "You generate short-form video copy that converts. "
+        "Output ONLY plain text blocks: Title:, Hook:, Captions:. "
+        "Titles: 8–12 words, punchy, no emojis. "
+        "Hook: <=12 words, must stop scroll. "
+        "Captions: 3 lines, each <100 chars, no hashtags unless user asked."
+    )
+    prompt = f"""
+Create a high-converting short-form package for this brief:
+
+{user_brief.strip()}
+
+Return exactly:
+Title: <one line>
+Hook: <one line>
+Captions:
+- <line 1>
+- <line 2>
+- <line 3>
+""".strip()
+
+    msgs = [
+        {"role":"system","content":system},
+        {"role":"user","content":prompt}
+    ]
+    return ask_perplexity(msgs, temperature=0.5)
+
+# integrate -yt into CLI
+# (keep this near the end, before `if __name__ == "__main__":` block)   
