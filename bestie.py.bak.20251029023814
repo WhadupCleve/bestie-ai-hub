@@ -64,14 +64,6 @@ Captions:
         temperature=0.5
     )
 
-def yt_variants(brief: str, n: int = 3) -> str:
-    # Generate n independent variants; concise divider lines for easy copy.
-    out = []
-    for i in range(1, n+1):
-        variant = yt_mode(brief)
-        out.append(f"### Variant {i}\n{variant}\n")
-    return "\n".join(out).strip()
-
 def plan_mode(brief: str) -> str:
     sysmsg = ("You are an operator-grade planner. Output a 7-day Tactical Elite mission brief. "
               "Format strictly: OPERATION: OPERATION-PLAN / OVERVIEW: <one line> then DAY n // OBJECTIVE: ... "
@@ -99,7 +91,7 @@ Stack focus: Termux Python, Hugging Face Spaces (mobile), GitHub, PERPLEXITY API
 
 def main():
     if len(sys.argv) <= 1:
-        print('Usage:\n  bestie "message"\n  bestie -bio "context"\n  bestie -yt "video brief"\n  bestie -yt3 "video brief"  # 3 variants\n  bestie -plan "focus"')
+        print('Usage:\n  bestie "message"\n  bestie -bio "context"\n  bestie -yt "video brief"\n  bestie -plan "focus"')
         return
 
     mode = sys.argv[1]
@@ -107,8 +99,6 @@ def main():
         print(bio_mode(" ".join(sys.argv[2:]).strip() or "Mobile-only HF Spaces + Termux; multi-model orchestration.")); return
     if mode == "-yt":
         print(yt_mode(" ".join(sys.argv[2:]).strip() or "Ohio State hype; 12–20s vertical; fierce; no hashtags.")); return
-    if mode == "-yt3":
-        print(yt_variants(" ".join(sys.argv[2:]).strip() or "Ohio State hype; 12–20s vertical; fierce; no hashtags.", n=3)); return
     if mode == "-plan":
         print(plan_mode(" ".join(sys.argv[2:]).strip() or "Harden mobile multi-model orchestration with reproducible wins.")); return
 
