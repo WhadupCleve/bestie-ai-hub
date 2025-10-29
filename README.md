@@ -1,32 +1,19 @@
-# 🐼 Bestie AI Hub — Mobile Multi-Model Orchestration
+# Bestie AI Hub (Mobile)
+Mobile-native AI CLI (Termux) powered by Perplexity. Stable, fast, reproducible.
 
-**What this is:**  
-A lightweight AI control hub I built entirely on **Android (Motorola G-series) using Termux + Hugging Face + multiple AI APIs**.  
-It orchestrates **multiple AI models talking to each other** (Claude / DeepSeek / OpenAI / Qwen / Grok / Kimi / Minstrel), enabling **draft → critique → final polish → optional memory**, all from a **phone**, not a laptop.
+## Commands
+- `bestie "text"` — chat
+- `bestie -yt "brief"` — Title/Hook/Captions
+- `bestie -yt3 "brief"` — 3 variants
+- `bestie -bio "brief"` — mythic third-person bio
+- `bestie -plan "focus"` — 7-day Tactical Elite plan
 
----
+## One-tap ops
+- `bboot` → load venv + .env
+- `bhealth` → sanity ping + log tail
+- `bsync` → pull/rebase + commit + push
+- `byt|bbio|bplan` → quick generate
+- `byt3|bbio_save|bplan_save` → saves to /outputs
+- `backup_env.sh` → local .env snapshot (never pushed)
 
-## 🚀 Why this project is unique
-- Runs **100% on mobile** — no laptop, no cloud VM
-- Uses **real paid AI APIs** (not just chat apps)
-- Handles **multi-model orchestration & fallbacks**
-- Future-ready for **OSINT, content pipelines, Seemless dating AI**, and more
-- Moves me from **“AI user” → “AI systems builder”**
-
----
-
-## ⚙️ Planned Core Features
-> (Built step-by-step — not all enabled yet)
-
-| Feature | Status |
-|---------|--------|
-| Multi-model prompt routing (Claude → DeepSeek → OpenAI) | ✅ Core pipeline working |
-| API key fallback logic (never breaks on failure) | ✅ In progress |
-| Terminal CLI (`python hub.py`) | ✅ Running manually |
-| Hugging Face Space UI | ✅ Already booted once |
-| Memory via ChromaDB | 🔄 coming |
-| Voice / OSINT / Seemless dating tools | 🔄 later |
-
----
-
-## 🧠 Basic Architecture (simplified)
+> Secrets live only in `.env` (ignored by git).

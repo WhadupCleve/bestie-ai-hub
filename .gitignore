@@ -208,3 +208,5 @@ __marimo__/
 .venv/
 *.pyc
 .git-credentials
+.env.backup*
+HEALTH.log
