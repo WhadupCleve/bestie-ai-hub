@@ -17,3 +17,5 @@ __pycache__/
 # local venv + logs
 .venv/
 HEALTH.log
+.state/
+.cache/

@@ -6,3 +6,13 @@ while true; do
   ./auto_health.sh || echo "$(date -u) — health FAILED" >> HEALTH.log
   sleep 10800  # 3 hours
 done
+
+# router health ping
+~/bestie_ai/router.sh "ping" >/dev/null 2>&1 || echo "$(date -u +"0.000000 
+# router health ping
+~/bestie_ai/router.sh "ping" >/dev/null 2>&1 || echo "$(date -u +\"%F %T UTC\") — router offline" >> HEALTH.log
+
+
+# router health ping
+~/bestie_ai/router.sh "ping" >/dev/null 2>&1 || echo "$(date -u +\"%F %T UTC\") — router offline" >> ~/bestie_ai/HEALTH.log
+

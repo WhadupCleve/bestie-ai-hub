@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/env python
 import os, sys, requests, json
 
 KEY = os.getenv("GEMINI_API_KEY")
