@@ -64,3 +64,26 @@ else
   log_health "router failure ${n}/${FAIL_MAX}"
 fi
 exit 2
+
+# --- HF quick health gate (skip on 401/404) ---
+hf_quick_check() {
+  [ "${ENABLE_HF:-0}" = "1" ] || return 1
+  [ -n "${HF_TOKEN:-}" ] || return 1
+  local model="${HF_MODEL:-gpt2}"
+  local task="${HF_TASK:-text-generation}"
+  # tiny HEAD-style ping (POST with 0 max tokens)
+  code=$(curl -s -o /dev/null -w '%{http_code}' \
+    -H "Authorization: Bearer $HF_TOKEN" -H 'Content-Type: application/json' \
+    -X POST "https://router.huggingface.co/hf-inference/${task}?model=${model}" \
+    -d '{"inputs":"ping","parameters":{"max_new_tokens":1}}' || echo 599)
+  case "$code" in
+    200) return 0 ;;
+    401|403|404|5*) return 1 ;;
+    *) return 1 ;;
+  esac
+}
+
+# prefer Gemini; HF only if healthy
+if [ "$ok" = "0" ] && [ "${ENABLE_HF:-0}" = "1" ] && hf_quick_check; then
+  if call_hf "$@"; then ok=1; fi
+fi
