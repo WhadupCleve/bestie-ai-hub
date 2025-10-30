@@ -12,9 +12,11 @@ CLIV="ok"
 # 2) API keys (masked)
 PKEY="${PERPLEXITY_API_KEY:-}"
 GKEY="${GEMINI_API_KEY:-}"
+HKEY="${HF_TOKEN:-}"
 if [ -n "$PKEY" ]; then PSHOW="Perplexity(****${PKEY: -4})"; else PSHOW="Perplexity(MISSING)"; fi
 if [ -n "$GKEY" ]; then GSHOW="Gemini(****${GKEY: -4})"; else GSHOW="Gemini(MISSING)"; fi
-API="$PSHOW | $GSHOW"
+if [ -n "$HKEY" ]; then HSHOW="HF(****${HKEY: -4})"; else HSHOW="HF(no-token)"; fi
+API="$PSHOW | $GSHOW | $HSHOW"
 
 # 3) Git status
 BR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-branch")
