@@ -9,13 +9,12 @@ cd ~/bestie_ai
 PYV=$(python -V 2>/dev/null || echo "python not found")
 CLIV="ok"
 
-# 2) API key (masked)
-if [ -z "${PERPLEXITY_API_KEY:-}" ]; then
-  API="MISSING"
-else
-  LAST4="${PERPLEXITY_API_KEY: -4}"
-  API="present (****${LAST4})"
-fi
+# 2) API keys (masked)
+PKEY="${PERPLEXITY_API_KEY:-}"
+GKEY="${GEMINI_API_KEY:-}"
+if [ -n "$PKEY" ]; then PSHOW="Perplexity(****${PKEY: -4})"; else PSHOW="Perplexity(MISSING)"; fi
+if [ -n "$GKEY" ]; then GSHOW="Gemini(****${GKEY: -4})"; else GSHOW="Gemini(MISSING)"; fi
+API="$PSHOW | $GSHOW"
 
 # 3) Git status
 BR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-branch")
